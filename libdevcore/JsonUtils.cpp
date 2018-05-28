@@ -56,7 +56,7 @@ std::string dev::jsonTypeAsString(json_spirit::Value_type _type)
 }
 
 void dev::requireJsonFields(json_spirit::mObject const& _o, std::string const& _config,
-    std::map<std::string, possibleJsonType> const& _validationMap,
+    std::map<std::string, jsonTypeSet> const& _validationMap,
     std::set<std::string> const& _ignoreFields)
 {
     // check for unexpected fiedls
@@ -85,17 +85,20 @@ void dev::requireJsonFields(json_spirit::mObject const& _o, std::string const& _
         }
 
         bool matched = false;
-        std::string sTypes;
         for (auto const& type : vmap.second)
         {
-            if (sTypes.size())
-                sTypes += ", or ";
-            sTypes += jsonTypeAsString(type);
             if (_o.at(vmap.first).type() == type)
                 matched = true;
         }
         if (matched == false)
         {
+            std::string sTypes;
+            for (auto const& type : vmap.second)
+            {
+                if (sTypes.size())
+                    sTypes += ", or ";
+                sTypes += jsonTypeAsString(type);
+            }
             std::string const comment =
                 "Field '" + vmap.first + "' expected to be " + sTypes + ", but set to " +
                 jsonTypeAsString(_o.at(vmap.first).type()) + " in " + _config;
